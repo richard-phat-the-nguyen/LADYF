@@ -1,0 +1,202 @@
+Code co-conçu avec copilot. Code de base en python et demande de prompt pour insérer 2 profiles, 2 rails.
+
+# Fusion 360 script that uses the user's functions unchanged
+# Creates 2 rails (XZ), 2 closed profiles (XY at z[0] and z[-1]) and a loft using the rails
+
+import numpy as np
+from scipy.optimize import fsolve
+import time
+
+import adsk.core, adsk.fusion, adsk.cam, traceback
+
+# -------------------------
+# User functions (unchanged)
+# -------------------------
+def bord_attaque(z):
+    return 0.0152*z**3 - 0.1284*z**2+ 0.1048*z+0.981 
+
+def bord_fuite(z):
+    return 0.0063*z**3- 0.0153*z**2 +0.0133*z
+
+def intersection(z):
+    return bord_attaque(z)-bord_fuite(z)
+
+def tubercle(z,corde=1 ,limite=1/3):
+    seuil=fsolve(intersection,0.5)[0]*limite
+    A=0.05*corde
+    Lambda=0.5*corde
+    bord_attaque_tubercle=A*np.sin(2*np.pi*(z-seuil)/Lambda)
+    # Filtre
+    Filtre=z<seuil
+    bord_attaque_tubercle[Filtre]=0
+    return bord_attaque_tubercle
+
+def naca0021(x, tnaca):
+    y = 5.0 * tnaca * (
+        0.2969 * np.sqrt(x)
+        - 0.1260 * x
+        - 0.3516 * x**2
+        + 0.2843 * x**3
+        - 0.1036 * x**4
+    )
+    return y
+
+def profil0021(scale,dx,dy):
+    beta=np.linspace(0,np.pi,50)
+    x=(1-np.cos(beta))/2
+    y=naca0021(x,0.21)*scale
+    x=x*scale
+    x=-x+dx
+    y_extrados=y+dy
+    y_intrados=-y+dy
+    return [x,y_extrados,y_intrados]
+
+def programme_idrissa():
+    z_npts=200
+    # Resolution de l'intersection
+    z_inter=fsolve(intersection,0.5)
+    z=np.linspace(0,0.995*z_inter[0],z_npts)
+    # Calcul du bord attaque et fuite avant modification des oscillation
+    L_edge=bord_attaque(z)
+    T_edge=bord_fuite(z)
+    corde=L_edge-T_edge
+    # IMPORTANT LA CORDE MOYENNE
+    corde_moyenne=np.average(corde)
+    oscillation=tubercle(z,corde_moyenne,1/3)
+    # Calcul des oscillations
+    L_edge_corrige=L_edge+oscillation
+    return [z, L_edge_corrige,T_edge ]
+
+# -------------------------
+# Fusion API wrapper (fixed tip Z)
+# -------------------------
+def run(context):
+    ui = None
+    try:
+        app = adsk.core.Application.get()
+        ui = app.userInterface
+
+        design = adsk.fusion.Design.cast(app.activeProduct)
+        if not design:
+            ui.messageBox("Open a Fusion design and run the script again.")
+            return
+
+        root = design.rootComponent
+
+        # Get geometry from user's program
+        z, Le, Te = programme_idrissa()
+
+        # --- Create rails on XZ plane ---
+        xzPlane = root.xZConstructionPlane
+
+        skLE = root.sketches.add(xzPlane)
+        skLE.name = "Rail_LeadingEdge"
+
+        skTE = root.sketches.add(xzPlane)
+        skTE.name = "Rail_TrailingEdge"
+
+        # Convert world points into the sketch coordinate system before adding to spline
+        def add_spline_xz(sketch, x_array, z_array):
+            pts = adsk.core.ObjectCollection.create()
+            for xv, zv in zip(x_array, z_array):
+                world_pt = adsk.core.Point3D.create(float(xv), 0.0, float(zv))
+                sketch_pt = sketch.modelToSketchSpace(world_pt)
+                pts.add(sketch_pt)
+            spline = sketch.sketchCurves.sketchFittedSplines.add(pts)
+            return spline
+
+        railLE = add_spline_xz(skLE, Le, z)
+        railTE = add_spline_xz(skTE, Te, z)
+
+        # --- Create XY planes at z[0] and z[-1] ---
+        z_root = float(z[0])
+        z_tip  = float(z[-1])
+
+        planes = root.constructionPlanes
+
+        planeInput_root = planes.createInput()
+        planeInput_root.setByOffset(root.xYConstructionPlane, adsk.core.ValueInput.createByReal(z_root))
+        plane_root = planes.add(planeInput_root)
+
+        planeInput_tip = planes.createInput()
+        planeInput_tip.setByOffset(root.xYConstructionPlane, adsk.core.ValueInput.createByReal(z_tip))
+        plane_tip = planes.add(planeInput_tip)
+
+        # --- Create closed profiles (single fitted spline each) ---
+        skRoot = root.sketches.add(plane_root)
+        skRoot.name = "Profile_Root"
+
+        skTip = root.sketches.add(plane_tip)
+        skTip.name = "Profile_Tip"
+
+        # Build closed point list by concatenating extrados then reversed intrados
+        # IMPORTANT: world points use the plane Z (z_plane) so the sketchToModel conversion is correct
+        def make_closed_profile_points(sketch, x_arr, y_ex_arr, y_in_arr, z_plane):
+            pts = adsk.core.ObjectCollection.create()
+            # extrados forward
+            for xv, yv in zip(x_arr, y_ex_arr):
+                world_pt = adsk.core.Point3D.create(float(xv), float(yv), float(z_plane))
+                sketch_pt = sketch.modelToSketchSpace(world_pt)
+                pts.add(sketch_pt)
+            # intrados reversed (to close loop)
+            for xv, yv in zip(x_arr[::-1], y_in_arr[::-1]):
+                world_pt = adsk.core.Point3D.create(float(xv), float(yv), float(z_plane))
+                sketch_pt = sketch.modelToSketchSpace(world_pt)
+                pts.add(sketch_pt)
+            # repeat first point to ensure closure (optional)
+            first = pts.item(0)
+            pts.add(adsk.core.Point3D.create(first.x, first.y, first.z))
+            return pts
+
+        # Root profile points (world Z = z_root)
+        scale_root = float(Le[0] - Te[0])
+        dx_root    = float(Le[0])
+        dy_root    = 0.0
+        x_root, y_ex_root, y_in_root = profil0021(scale_root, dx_root, dy_root)
+
+        pts_root = make_closed_profile_points(skRoot, x_root, y_ex_root, y_in_root, z_root)
+        spline_root = skRoot.sketchCurves.sketchFittedSplines.add(pts_root)
+
+        # Tip profile points (world Z = z_tip) — FIXED: use z_tip here
+        scale_tip = float(Le[-1] - Te[-1])
+        dx_tip    = float(Le[-1])
+        dy_tip    = 0.0
+        x_tip, y_ex_tip, y_in_tip = profil0021(scale_tip, dx_tip, dy_tip)
+
+        pts_tip = make_closed_profile_points(skTip, x_tip, y_ex_tip, y_in_tip, z_tip)
+        spline_tip = skTip.sketchCurves.sketchFittedSplines.add(pts_tip)
+
+        # Validate profiles exist
+        if skRoot.profiles.count == 0 or skTip.profiles.count == 0:
+            ui.messageBox("Could not find closed profiles in sketches. Ensure the profile curves form a closed loop.")
+            return
+
+        profRoot = skRoot.profiles.item(0)
+        profTip  = skTip.profiles.item(0)
+
+        # --- Loft using rails ---
+        loftFeats = root.features.loftFeatures
+        loftInput = loftFeats.createInput(adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
+
+        loftInput.isSolid = True
+        loftInput.isClosed = False
+
+        # Add sections
+        loftInput.loftSections.add(profRoot)
+        loftInput.loftSections.add(profTip)
+
+        # Add rails (use the sketch curves created earlier)
+        rails = loftInput.centerLineOrRails
+        rails.addRail(railLE)
+        rails.addRail(railTE)
+
+        loft = loftFeats.add(loftInput)
+
+        ui.messageBox("Rails, closed profiles and loft created successfully (tip profile placed at z_tip).")
+
+    except:
+        if ui:
+            ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
+
+def stop(context):
+    pass
