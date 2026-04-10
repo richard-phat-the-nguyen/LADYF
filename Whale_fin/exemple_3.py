@@ -2,7 +2,7 @@
 # Généré par l'IA copilot 2026-03-23
 
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 import time
 
