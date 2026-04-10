@@ -1,4 +1,8 @@
 Description des codes Pythons et de leurs fonctionnalités
+Modules python dépendant:
+  -numpy
+  -math
+  -scipy
 
 Exemple 1)
 API qui génère
