@@ -1,4 +1,4 @@
-Code co-conçu avec copilot. Code de base en python et demande de prompt pour insérer 2 profiles, 2 rails.
+#Code co-conçu avec copilot. Code de base en python et demande de prompt pour insérer 2 profiles, 2 rails.
 
 # Fusion 360 script that uses the user's functions unchanged
 # Creates 2 rails (XZ), 2 closed profiles (XY at z[0] and z[-1]) and a loft using the rails
