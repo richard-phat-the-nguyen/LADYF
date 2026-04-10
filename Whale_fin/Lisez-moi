@@ -1,1 +1,10 @@
 Description des codes Pythons et de leurs fonctionnalités
+
+
+Exemple 4)
+API qui génère:
+  -Profil à la racine
+  -Profil à la pointe
+  -Courbes guide du bord d'attaque + équation onde oscillation
+  -Courbe guide du bord de fuite
+  -Génération de solide multi-section automatiquement
