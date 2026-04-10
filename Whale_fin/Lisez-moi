@@ -1,6 +1,12 @@
 Description des codes Pythons et de leurs fonctionnalités
 
 
+Exemple 3)
+API qui gén`re
+  -Courbe guide du bord d'attaque
+  -Courbe guide du bord de fuite
+Il n'y a pas de profil à l'amplanture ni à la pointe
+
 Exemple 4)
 API qui génère:
   -Profil à la racine
