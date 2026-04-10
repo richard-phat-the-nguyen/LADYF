@@ -1,4 +1,6 @@
 # LADYF
+Code maintenu pour les projets de recherches de Polytechnique Montréal
+www.polymtl.ca
 
 Pour Fusion 360, les API sont en codes python.
 Pour installer les modules externes compatibles avec Fusion, suivre le liens comme guide:
