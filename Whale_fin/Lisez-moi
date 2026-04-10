@@ -15,8 +15,11 @@ PRÉSENCE D'ERREUR ET TRAÇAGE MANUELLEMENT
 Durée: Environ 10 secondes
 
 Exemple 2)
-API qui génère
-  -Multiple profil le long de l'envergure
+API qui génère 
+  -300 plans décallés avec 300 profils NACA
+  -Génère les multi-sections
+NE GÉNÈRE PAS DE RAILS
+Durée : Variable environ 1 heure
 
 Exemple 3)
 API qui génère
