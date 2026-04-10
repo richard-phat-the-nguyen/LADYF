@@ -70,8 +70,8 @@ def run(context):
         window_size = 5
         kernel = np.ones(window_size) / window_size
         oscillation = np.convolve(oscillation, kernel, mode='same')
-        L_edge=bord_attaque(z)+oscillation
-        T_edge=bord_fuite(z)
+        L_edge=bord_attaque(z2)+oscillation
+        T_edge=bord_fuite(z2)
 
         # Collect profiles for loft
         profiles = []
