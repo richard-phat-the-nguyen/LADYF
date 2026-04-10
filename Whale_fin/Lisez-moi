@@ -4,7 +4,7 @@ Modules python dépendant:
   -math
   -scipy
 
-Exemple 1)
+Exemple 1) 
 API qui génère
   -Profil à la racine
   -Profil à la pointe
@@ -12,6 +12,7 @@ API qui génère
   -Courbe guide du bord de fuite
 NE GÉNÈRE PAS DE MULTI SECTION
 PRÉSENCE D'ERREUR ET TRAÇAGE MANUELLEMENT
+Durée: Environ 10 secondes
 
 Exemple 2)
 API qui génère
@@ -22,6 +23,7 @@ API qui génère
   -Courbe guide du bord d'attaque
   -Courbe guide du bord de fuite
 Il n'y a pas de profil à l'amplanture ni à la pointe
+Durée: Environ 1 minute
 
 Exemple 4)
 API qui génère:
@@ -30,3 +32,4 @@ API qui génère:
   -Courbes guide du bord d'attaque + équation onde oscillation
   -Courbe guide du bord de fuite
   -Génération de solide multi-section automatiquement
+Durée: Environ 3 minutes
