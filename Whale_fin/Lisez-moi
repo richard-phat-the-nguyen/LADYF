@@ -16,10 +16,20 @@ Durée: Environ 10 secondes
 
 Exemple 2)
 API qui génère 
-  -300 plans décallés avec 300 profils NACA
+  -300 plans décallés avec 300 profils NACA avec Turburcule
   -Génère les multi-sections
 NE GÉNÈRE PAS DE RAILS
 Durée : Variable environ 1 heure
+
+
+Exemple 2v2)
+API qui génère 
+  -300 plans décallés avec 300 profils NACA sans Turburcule
+  -Génère les multi-sections
+NE GÉNÈRE PAS DE RAILS
+Durée : Environ 1 minute
+
+
 
 Exemple 3)
 API qui génère
