@@ -46,5 +46,5 @@ API qui génère:
   -Courbe guide du bord de fuite
   -Génération de solide multi-section automatiquement
 Durée: Environ 3 minutes
-<img src="../images/E4_1.jpg" alt="Éléments filaires" />
-<img src="../images/E4_2.jpg" alt="Multi-section" />
+<img src="../images/E4_1.jpg" alt="Éléments filaires" width="400"/>
+<img src="../images/E4_2.jpg" alt="Multi-section" width="400"/>
