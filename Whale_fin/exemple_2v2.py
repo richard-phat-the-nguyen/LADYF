@@ -1,4 +1,4 @@
-Code inspiré d'IA copilot et modifié par la suite
+#Code inspiré d'IA copilot et modifié par la suite
 
 import adsk.core, adsk.fusion, traceback
 import numpy as np
