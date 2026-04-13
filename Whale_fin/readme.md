@@ -28,6 +28,8 @@ API qui génère
   -Génère les multi-sections
 NE GÉNÈRE PAS DE RAILS
 Durée : Environ 1 minute
+<img src="../images/E2V2_1.jpg" alt="Éléments filaires" width="400"/>
+<img src="../images/E2V2_2.jpg" alt="Multi-section" width="400"/>
 
 
 
