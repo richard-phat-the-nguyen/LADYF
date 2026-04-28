@@ -7,6 +7,8 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
+#include "computeDP.h"
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // =========================
@@ -58,7 +60,10 @@ void Impression_pression() {
 
 
 float LecturePression() {
-  int N = analogRead(PIN_SDP);          // 0..1023
-  float dp = 750.0f * (float)N / 1023.0f - 150.0f;
-  return dp;                            // Pascals
+  int N = analogRead(PIN_SDP);                 // 0..1023
+  //Mode Linéaire
+  //float dp = 750.0f * (float)N / 1023.0f - 150.0f;
+  // Mode carré
+   float dp=computeDP(N);
+  return dp;                                   // Pascals                         // Pascals
 }
