@@ -62,8 +62,8 @@ void Impression_pression() {
 float LecturePression() {
   int N = analogRead(PIN_SDP);                 // 0..1023
   //Mode Linéaire
-  //float dp = 750.0f * (float)N / 1023.0f - 150.0f;
+  float dp = 750.0f * (float)N / 1023.0f - 150.0f;
   // Mode carré
-   float dp=computeDP(N);
+  //float dp=computeDP(N);
   return dp;                                   // Pascals                         // Pascals
 }
